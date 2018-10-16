@@ -2,28 +2,13 @@
 #include <stdio.h>
 #include <limits.h>
 #include <string.h>
-#define STRSIZE 512
-char res[STRSIZE];
+#include "tool.c"
 
-// 数组转换成字符串
-char* arr2str(char * res, int arr[], int length) {
-    int i, len;
-    char *s;
-    res = "[";
-    for (i = 0; i < length; i++) {
-        sprintf(s, "%d, ", arr[i]);
-        strcat(res, s);
-    }
-    len = strlen(res);
-    res[len - 1] = ']';
-    res[len] = '\0';
-    return res;
-}
+char str[STRSIZE];
 
 // 2.1-1 插入排序
 // 2.1-2 只需更改while循环条件的比较符合即可）
 void insert_sort(int arr[], int length) {
-    printf("Old: %s", arr2str(res, arr, length));
     int i, j, key, step = 0; 
     for ( j = 1; j < length; j++ ) {
         key = arr[j];
@@ -35,9 +20,8 @@ void insert_sort(int arr[], int length) {
         arr[i+1] = key;
         
         step++;
-        printf("%3d: %s", step, arr2str(res, arr, length));   
+        //printf("%3d: %s\n", step, arr_str(str, arr, length));
     }
-    printf("New: %s", arr2str(res, arr, length));
 }
 
 // 2.1-3 线性查找
@@ -52,7 +36,7 @@ int search_arr(int arr[], int length, int value) {
 }
 
 // 2.1-4 二进制数组加法
-void add_arr(int arr1[], int arr2[], int length, int result[]) {
+void add_arr(int result[], int arr1[], int arr2[], int length) {
     int i, sum, carry = 0;
     for (i = length - 1; i >= 0; i--) {
         sum = arr1[i] + arr2[i] + carry;
@@ -69,7 +53,6 @@ void add_arr(int arr1[], int arr2[], int length, int result[]) {
 
 // 2.2-2 选择排序
 void select_sort(int arr[], int length) {
-    printf("Old: %s", arr2str(res, arr, length));
     int i, j, key, step=0;
     for (i = 0; i < length - 1; i++) {
         for (j = i + 1; j < length; j++) {
@@ -80,20 +63,20 @@ void select_sort(int arr[], int length) {
             }
         }
 
-        step++;
-        printf("%3d: %s", step, arr2str(res, arr, length));   
+        step++; 
+        //printf("%3d: %s\n", step, arr_str(str, arr, length));
     }
-    printf("New: %s", arr2str(res, arr, length));
 }
 
 // 2.3-1 归并排序
 int step = 1;
+// 使用哨兵的合并子函数
 void merge(int arr[], int length, int start, int middle, int last) {
     int i, j, k;
     int mid0 = middle - start + 1;
     int mid1 = last - middle;
-    int first_arr[mid0 + 1];
-    int last_arr[mid1 + 1];
+    int first_arr[mid0 + 2];
+    int last_arr[mid1 + 2];
     // 分解复制为两个新数组
     for (i = 0; i < mid0; i++) {
         first_arr[i] = arr[start + i];
@@ -116,6 +99,46 @@ void merge(int arr[], int length, int start, int middle, int last) {
             j++;
         }
     } 
+    
+    printf("   : %s\n", arr_str(str, arr, length));
+}
+// 不使用哨兵的合并子函数
+void merge1(int arr[], int length, int start, int middle, int last) {
+    int i, j, k;
+    int mid0 = middle - start + 1;
+    int mid1 = last - middle;
+    int first_arr[mid0 + 1];
+    int last_arr[mid1 + 1];
+    // 分解复制为两个新数组
+    for (i = 0; i < mid0; i++) {
+        first_arr[i] = arr[start + i];
+    }
+    for (j = 0; j < mid1; j++) {
+        last_arr[j] = arr[middle + j + 1];
+    }
+    
+    i = 0;
+    j = 0;
+    // 合并两个数组
+    for (k = start; k <= last; k++) {
+        if (i == mid0) {
+            while (j < mid1) {
+                arr[k++] = last_arr[j++];
+            }
+            break;
+        } else if (j == mid1) {
+            while (i < mid0) {
+                arr[k++] = first_arr[i++];
+            }
+            break;
+        } else if (first_arr[i] <= last_arr[j]) {
+            arr[k] = first_arr[i++];
+        } else {
+            arr[k] = last_arr[j++];
+        }
+    } 
+    
+    printf("   : %s\n", arr_str(str, arr, length));
 }
 
 void merge_sort(int arr[], int length, int start, int last) {
@@ -123,43 +146,63 @@ void merge_sort(int arr[], int length, int start, int last) {
         int middle = (start + last) / 2;
         merge_sort(arr, length, start, middle);
         merge_sort(arr, length, middle + 1, last);
-        merge(arr, length, start, middle, last);
+        merge(arr, length, start, middle, last);  // 可选是否使用哨兵
     }
 }
 
+// 逆序对
+void inversion(int arr[], int length) {
+    int i, j, count = 0, t = 0;
+    for (i = 0; i < length - 1; i++) {
+        for (j = i + 1; j < length; j++) {
+            if (arr[i] > arr[j]) {
+                printf("No.%3d : (%2d, %2d)[%2d, %2d]\n", count++, i, j, arr[i], arr[j]);
+            }
+        }
+        t += (length - i - 1);        
+    }
+    printf("Total: %3d\n", t);
+}
+
 int main(void) {     
+    int arrlen = 10;
+    int arr[arrlen];
 
-    //*
-    int arr0[6] = {5, 2, 4, 6, 1, 3};
-    int arr1[6] = {31, 41, 59, 26, 41, 58};
+    rand_arr(arr, arrlen, 100);
+    printf("Old: %s\n", arr_str(str, arr, arrlen));
     // 2.1-3
-    printf("Index: %d\n", search_arr(arr1, 6, 26));
+    printf("Index of %d: %d\n", 26, search_arr(arr, arrlen, 26));
     // 2.1-1
-    insert_sort(arr0, 6);
-    insert_sort(arr1, 6);
-   
-   /*
-    // 2.2-2
-    int arr2[6] = {5, 2, 4, 6, 1, 3};
-    int arr3[6] = {31, 41, 59, 26, 41, 58};
-    select_sort(arr2, 6);
-    select_sort(arr3, 6);
-
+    insert_sort(arr, arrlen);
+    printf("New: %s\n\n", arr_str(str, arr, arrlen));
+    
     // 2.1-4
-    int binarr1[8] = {1, 1, 0, 1, 1, 1, 1, 0};
-    int binarr2[8] = {1, 0, 1, 1, 1, 1, 0, 1}; 
-    printf("binarr1: %s", arr2str(binarr1, 8)); 
-    printf("binarr2: %s", arr2str(binarr2, 8));
+    int binarr1[8], binarr2[8]; 
+    rand_arr(binarr1, 8, 2);
+    rand_arr(binarr2, 8, 2);
+    printf("binarr1:    %s\n", arr_str(str, binarr1, 8)); 
+    printf("binarr2:    %s\n", arr_str(str, binarr2, 8));
     int result[9];
-    add_arr(binarr1, binarr2, 8, result); 
-    printf("result : %s", arr2str(result, 9));
+    add_arr(result, binarr1, binarr2, 8); 
+    printf("result :%s\n\n", arr_str(str, result, 9));
 
-    //
-    // 2.3-1
-    int arr4[] = {2, 4, 5, 7, 1, 2, 3, 6};
-    int arr5[] = {3, 41, 52, 26, 38, 57, 9, 49};
-    merge_sort(arr4, 8, 0, 7);    
-    merge_sort(arr5, 8, 0, 7);
+    // 2.2-2
+    rand_arr(arr, arrlen, 100);
+    printf("Old: %s\n", arr_str(str, arr, arrlen));
+    select_sort(arr, arrlen);
+    printf("New: %s\n\n", arr_str(str, arr, arrlen));
 
-    */
+    // 2.3-1, 2.3-2
+    rand_arr(arr, arrlen, 100);
+    printf("Old: %s\n", arr_str(str, arr, arrlen));
+    merge_sort(arr, arrlen, 0, arrlen - 1); 
+    printf("New: %s\n\n", arr_str(str, arr, arrlen));
+
+    // 2-4 
+    //rand_arr(arr, arrlen, 100);
+    for (int i = 0; i < arrlen; i++) { arr[i] = arrlen - i; }
+    printf("Old: %s\n", arr_str(str, arr, arrlen));
+    inversion(arr, arrlen); 
+    printf("New: %s\n\n", arr_str(str, arr, arrlen));
+
 }
