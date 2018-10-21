@@ -1,3 +1,3 @@
 @echo off
-gcc ch2.c
+gcc ch6.c
 a.exe
