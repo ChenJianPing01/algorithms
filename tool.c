@@ -24,7 +24,7 @@ char * arr_str(int arr[], int length)
     int i, len = 1;
     sprintf(str, "[");
     for (i = 0; i < length; i++) {
-        sprintf(str + len, "%2d, ", arr[i]);
+        sprintf(str + len, "%d, ", arr[i]);
         len = strlen(str);
     }
     sprintf(str + len - 2, "%s", "]");
